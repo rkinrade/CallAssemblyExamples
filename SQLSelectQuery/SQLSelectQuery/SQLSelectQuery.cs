@@ -21,9 +21,15 @@ namespace SQLSelectQuery
             SqlCommand command = new SqlCommand();
 
             //Property 1 is used as our SQL Connection String
-            connection.ConnectionString = @Input["1"];
+            connection.ConnectionString = @Input["1"];  //1 represents the ID of the property that contains the connection string.
+
             //Property 2 is used as our SQL SELECT Query.
-            command.CommandText = Input["2"];
+            String sqlQuery = Input["2"]; //2 represents the ID of the property that contains the SQL Query.
+            sqlQuery = sqlQuery.Replace("#ARCHIVEID#", Input["ARCHIVEID"]);
+            sqlQuery = sqlQuery.Replace("#DOCID#", Input["DOCUMENTID"]);
+            sqlQuery = sqlQuery.Replace("#DATABASEID#", Input["DATABASEID"]);
+
+            command.CommandText = sqlQuery;
 
             //Declare the Output variable that will be used to collect/return our processed data.
             Dictionary<string, string> Output = new Dictionary<string, string>();
@@ -39,7 +45,7 @@ namespace SQLSelectQuery
                         if (reader[0] != null)
                         {
                             //The result that is returned from the SQL query is added to our return Dictionary object as Property 3's Value.
-                            Output.Add("3", reader[0].ToString());
+                            Output.Add("3", reader[0].ToString()); //3 represents the ID of the property that contains the return value.
                         }
                     }
                 }
