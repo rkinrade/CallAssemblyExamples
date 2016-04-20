@@ -58,6 +58,10 @@ namespace SQLSelectQuery
                                 //The result that is returned from the SQL query is added to our return Dictionary object as Property id and Value.
                                 Output.Add(propertyMap.ReturnValue, reader[0].ToString());
                             }
+                            else
+                            {
+                                Output.Add(propertyMap.ReturnValue, "No data");
+                            }
                         }
                     }
                     connection.Close();
