@@ -1,5 +1,0 @@
-C:\Users\rkinrade\Sandbox-Bitbucket\Square9App_Debug\SQLSelectQuery.dll
-C:\Users\rkinrade\Sandbox-Bitbucket\Square9App_Debug\SQLSelectQuery.pdb
-C:\Users\rkinrade\Documents\GitHub\CallAssemblyExamples\SQLSelectQuery\SQLSelectQuery\obj\Debug\SQLSelectQuery.csprojResolveAssemblyReference.cache
-C:\Users\rkinrade\Documents\GitHub\CallAssemblyExamples\SQLSelectQuery\SQLSelectQuery\obj\Debug\SQLSelectQuery.dll
-C:\Users\rkinrade\Documents\GitHub\CallAssemblyExamples\SQLSelectQuery\SQLSelectQuery\obj\Debug\SQLSelectQuery.pdb
