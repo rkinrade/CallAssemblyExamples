@@ -19,62 +19,71 @@ namespace SQLSelectQuery
             //Declare the Output variable that will be used to collect/return our processed data.
             Dictionary<string, string> Output = new Dictionary<string, string>();
 
-            //property names and their ids are stored in an xml file. the name is the element, the id has to match the dictionary key.
-            String mappingfile = "PropertyMapping.xml";
-
-            if (File.Exists(mappingfile))
+            try
             {
-                //we create an object to deserialize the xml to. 
-                PropertyMapping propertyMap = new PropertyMapping();
-                propertyMap = propertyMap.Deserialize(mappingfile);
+                //property names and their ids are stored in an xml file. the name is the element, the id has to match the dictionary key.
+                String mappingfile = Path.Combine(Path.GetDirectoryName(System.Reflection.Assembly.GetCallingAssembly().Location), "PropertyMapping.xml");
 
-                //Now, for each Workflow Property Value that we have in our Input, perform some sort of processing with that data.
-                //In this example, we are taking a SQL Connection string and a SQL query, then running the SQL query to get a value.
-                SqlConnection connection = new SqlConnection();
-                SqlCommand command = new SqlCommand();
-
-                //the dictionary's key value for the connectionstring
-                connection.ConnectionString = @Input[propertyMap.ConnectionString];  //1 represents the ID of the property that contains the connection string.
-
-                //the dictionary's key value for the SQL SELECT Query.
-                String sqlQuery = Input[propertyMap.SqlStatement];
-                //these values are populated by the Call Assembly workflow node
-                sqlQuery = sqlQuery.Replace("#ARCHIVEID#", Input["ARCHIVEID"]);
-                sqlQuery = sqlQuery.Replace("#DOCID#", Input["DOCUMENTID"]);
-                sqlQuery = sqlQuery.Replace("#DATABASEID#", Input["DATABASEID"]);
-
-                command.CommandText = sqlQuery;
-
-                if (connection.ConnectionString != String.Empty && command.CommandText != String.Empty)
+                if (File.Exists(mappingfile))
                 {
-                    connection.Open();
-                    command.Connection = connection;
-                    using (SqlDataReader reader = command.ExecuteReader())
+                    //we create an object to deserialize the xml to. 
+                    PropertyMapping propertyMap = new PropertyMapping();
+                    propertyMap = propertyMap.Deserialize(mappingfile);
+
+                    //Now, for each Workflow Property Value that we have in our Input, perform some sort of processing with that data.
+                    //In this example, we are taking a SQL Connection string and a SQL query, then running the SQL query to get a value.
+                    SqlConnection connection = new SqlConnection();
+                    SqlCommand command = new SqlCommand();
+
+                    //the dictionary's key value for the connectionstring
+                    connection.ConnectionString = @Input[propertyMap.ConnectionString];  //1 represents the ID of the property that contains the connection string.
+
+                    //the dictionary's key value for the SQL SELECT Query.
+                    String sqlQuery = Input[propertyMap.SqlStatement];
+                    //these values are populated by the Call Assembly workflow node
+                    sqlQuery = sqlQuery.Replace("#ARCHIVEID#", Input["ARCHIVEID"]);
+                    sqlQuery = sqlQuery.Replace("#DOCID#", Input["DOCUMENTID"]);
+                    sqlQuery = sqlQuery.Replace("#DATABASEID#", Input["DATABASEID"]);
+
+                    command.CommandText = sqlQuery;
+
+                    if (connection.ConnectionString != String.Empty && command.CommandText != String.Empty)
                     {
-                        if (reader.Read())
+                        connection.Open();
+                        command.Connection = connection;
+                        using (SqlDataReader reader = command.ExecuteReader())
                         {
-                            if (reader[0] != null)
+                            if (reader.Read())
                             {
-                                //The result that is returned from the SQL query is added to our return Dictionary object as Property id and Value.
-                                Output.Add(propertyMap.ReturnValue, reader[0].ToString());
-                            }
-                            else
-                            {
-                                Output.Add(propertyMap.ReturnValue, "No data");
+                                if (reader[0] != null)
+                                {
+                                    //The result that is returned from the SQL query is added to our return Dictionary object as Property id and Value.
+                                    Output.Add(propertyMap.ReturnValue, reader[0].ToString());
+                                }
+                                else
+                                {
+                                    Output.Add(propertyMap.ReturnValue, "No Data");
+                                }
                             }
                         }
+                        connection.Close();
                     }
-                    connection.Close();
                 }
+                else
+                {
+                    Output.Add("-1", "PropertyMapping.xml not found.");
+                }
+
             }
-            else
+            catch (Exception ex)
             {
-                Output.Add("-1", "PropertyMapping.xml not found.");
+                //Log some errors out
+                String errorPath = Path.Combine(Path.GetDirectoryName(System.Reflection.Assembly.GetCallingAssembly().Location), "SQLCallAssembly.log");
+                File.AppendAllText(errorPath, "\r\n" + DateTime.Now.ToString() + ex.Message + "\r\n" + ex.StackTrace);
             }
             //Finally, return our Output Dictionary Object that will be used set the new Values of each Workflow Property.
             //It is only necessary to return the Property ID's and Values of the Properties that are updated.
             return Output;
-           
         }
 
         private String giveMeSpace(String path)
@@ -100,6 +109,7 @@ namespace SQLSelectQuery
             xs.Serialize(writer, propertyMap);
             writer.Flush();
             writer.Close();
+            writer.Dispose();
         }
 
         public PropertyMapping Deserialize(string file)
@@ -110,6 +120,7 @@ namespace SQLSelectQuery
             StreamReader reader = File.OpenText(file);
             PropertyMapping propertyMap = (PropertyMapping)xs.Deserialize(reader);
             reader.Close();
+            reader.Dispose();
             return propertyMap;
         }
     }
