@@ -8,11 +8,15 @@ The current binary can be found here:  http://www.square-9.com/dlls/SQLSelectQue
 Usage of the binary will require the dll be placed in your server's GetSmart folder.  You will also need to add an XML config file to 
 map property id's to the correct fields.  PropertyMapping.xml should be formatted as follows, where the property ID reflects the correct element in the workflow:
 
+```xml
+
 <PropertyMapping>
   <ConnectionString>1</ConnectionString>
   <SqlStatement>2</SqlStatement>
   <ReturnValue>3</ReturnValue>
 </PropertyMapping>
+
+```
 
 This is a quick and useful way to pull data from a SQL database using a document's index data in a GlobalAction workflow.
 Use this method if you want:
