@@ -41,9 +41,20 @@ namespace SQLSelectQuery
                     //the dictionary's key value for the SQL SELECT Query.
                     String sqlQuery = Input[propertyMap.SqlStatement];
                     //these values are populated by the Call Assembly workflow node
-                    sqlQuery = sqlQuery.Replace("#ARCHIVEID#", Input["ARCHIVEID"]);
-                    sqlQuery = sqlQuery.Replace("#DOCID#", Input["DOCUMENTID"]);
-                    sqlQuery = sqlQuery.Replace("#DATABASEID#", Input["DATABASEID"]);
+
+                    //Allows this call assembly to work with GlobalCapture in addition to GlobalAction (GC does not pass these keys in the dict object)
+                    if (Input.ContainsKey("ARCHIVEID"))
+                    {
+                        sqlQuery = sqlQuery.Replace("#ARCHIVEID#", Input["ARCHIVEID"]);
+                    }
+                    if (Input.ContainsKey("DOCUMENTID"))
+                    {
+                        sqlQuery = sqlQuery.Replace("#DOCID#", Input["DOCUMENTID"]);
+                    }
+                    if (Input.ContainsKey("DATABASEID"))
+                    {
+                        sqlQuery = sqlQuery.Replace("#DATABASEID#", Input["DATABASEID"]);
+                    }
 
                     command.CommandText = sqlQuery;
 
