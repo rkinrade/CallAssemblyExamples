@@ -90,7 +90,15 @@ namespace SQLSelectQuery
             {
                 //Log some errors out
                 String errorPath = Path.Combine(Path.GetDirectoryName(System.Reflection.Assembly.GetCallingAssembly().Location), "SQLCallAssembly.log");
-                File.AppendAllText(errorPath, "\r\n" + DateTime.Now.ToString() + ex.Message + "\r\n" + ex.StackTrace);
+
+                //Log the input dictionary for troubleshooting
+                File.AppendAllText(errorPath, DateTime.Now.ToString() + ": An error has occured, input data: ");
+                foreach (var procField in Input)
+                {
+                    File.AppendAllText(errorPath, String.Format("\r\nName: {0}, Value: {1}", procField.Key, procField.Value));
+                }
+
+                File.AppendAllText(errorPath, "\r\n" + DateTime.Now.ToString() + ": Exeption text: " + ex.Message + "\r\nStack Trace: " + ex.StackTrace);
             }
             //Finally, return our Output Dictionary Object that will be used set the new Values of each Workflow Property.
             //It is only necessary to return the Property ID's and Values of the Properties that are updated.
