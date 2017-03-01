@@ -35,11 +35,49 @@ namespace SQLSelectQuery
                     SqlConnection connection = new SqlConnection();
                     SqlCommand command = new SqlCommand();
 
+                    //Create a variable to hold our WorkflowID from the Input dictionary
+                    String workflowID;
+                    
+
+                    /* Use Linq to find the value for WorkflowID from the Input Dictionary (note: the property in your workflow
+                    must be set to "WorkflowID=MyID" without quotes). Here I skip over null values because empty workflow properties are passed as nulls and 
+                    default the workflowID variable to an empty string in case no values are found in the dictionary. This avoids throwing a null reference 
+                    exception in case someoene forgets to pass a workflowID in their workflow fields.*/
+                    workflowID = Input.Values.Where(x => x != null && x.Contains("WorkflowID=")).DefaultIfEmpty("").FirstOrDefault().Replace("WorkflowID=","");
+                    
+                    //Declare variables to hold the IDs for the Connection String, SQL Statement, and Return Value found in the PropertyMapping.xml file
+                    string connectionID = "";
+                    string statementID = "";
+                    string returnID = "";
+
+                    //Query PropertyMapping.xml for the relevant Workflow's Field IDs
+                    if (workflowID != "")
+                    {
+                        PropertyMap workflowProperties = propertyMap.Workflows.Where(x => x.WorkflowID.ToLower() == workflowID.ToLower()).FirstOrDefault();
+                        
+                        if (workflowProperties != null)
+                        {
+                            connectionID = workflowProperties.ConnectionString;
+                            statementID = workflowProperties.SqlStatement;
+                            returnID = workflowProperties.ReturnValue;
+                        }
+                        else
+                        {
+                            Output.Add("-1", "WorkflowID not found in PropertyMapping.XML. Verify that WorkflowID value in XML matches that which was entered into the workflow field (case sensitive).");
+                            return Output;
+                        }
+                    }
+                    else
+                    {
+                        Output.Add("-1", "WorkflowID not found in Workflow fields. Verify that you have a workflow field set to WorkflowID=MyID. Note that the value of the field is case sensitive and must match a WorkflowID in the PropertyMapping.XML file.");
+                        return Output;
+                    }
+
                     //the dictionary's key value for the connectionstring
-                    connection.ConnectionString = @Input[propertyMap.ConnectionString];  //1 represents the ID of the property that contains the connection string.
+                    connection.ConnectionString = @Input[connectionID];  //1 represents the ID of the property that contains the connection string.
 
                     //the dictionary's key value for the SQL SELECT Query.
-                    String sqlQuery = Input[propertyMap.SqlStatement];
+                    String sqlQuery = Input[statementID];
                     //these values are populated by the Call Assembly workflow node
 
                     //Allows this call assembly to work with GlobalCapture in addition to GlobalAction (GC does not pass these keys in the dict object)
@@ -69,11 +107,11 @@ namespace SQLSelectQuery
                                 if (reader[0] != null)
                                 {
                                     //The result that is returned from the SQL query is added to our return Dictionary object as Property id and Value.
-                                    Output.Add(propertyMap.ReturnValue, reader[0].ToString());
+                                    Output.Add(returnID, reader[0].ToString());
                                 }
                                 else
                                 {
-                                    Output.Add(propertyMap.ReturnValue, "No Data");
+                                    Output.Add(returnID, "No Data");
                                 }
                             }
                         }
@@ -114,11 +152,22 @@ namespace SQLSelectQuery
     /// <summary>
     /// create an object that will match the xml file
     /// </summary>
-    public class PropertyMapping
+        public class PropertyMapping
     {
-        public String ConnectionString { get; set; }
-        public String SqlStatement { get; set; }
-        public String ReturnValue { get; set; }
+        private PropertyMap[] propertyMapField;
+
+        [System.Xml.Serialization.XmlElementAttribute("PropertyMap")]
+        public PropertyMap[] Workflows
+        {
+            get
+            {
+                return this.propertyMapField;
+            }
+            set
+            {
+                this.propertyMapField = value;
+            }
+        }
 
         public void Serialize(String file, PropertyMapping propertyMap)
         {
@@ -141,6 +190,64 @@ namespace SQLSelectQuery
             reader.Close();
             reader.Dispose();
             return propertyMap;
+        }
+    }
+
+    [System.Xml.Serialization.XmlTypeAttribute(AnonymousType = true)]
+    public class PropertyMap
+    {
+
+        private string workflowIDField;
+        private string connectionStringField;
+        private string sqlStatementField;
+        private string returnValueField;
+
+        public string WorkflowID
+        {
+            get
+            {
+                return this.workflowIDField;
+            }
+            set
+            {
+                this.workflowIDField = value;
+            }
+        }
+
+        public string ConnectionString
+        {
+            get
+            {
+                return this.connectionStringField;
+            }
+            set
+            {
+                this.connectionStringField = value;
+            }
+        }
+
+        public string SqlStatement
+        {
+            get
+            {
+                return this.sqlStatementField;
+            }
+            set
+            {
+                this.sqlStatementField = value;
+            }
+        }
+
+        public string ReturnValue
+        {
+            get
+            {
+                return this.returnValueField;
+            }
+            set
+            {
+                this.returnValueField = value;
+            }
         }
     }
 }
