@@ -1,3 +1,3 @@
 # GlobalAction Call Assembly Node Examples 
 
-View the readme in each example for more information and usage.
+Sample call assembly code.  SQLSelectQuery is supported in production environments only when unaltered.

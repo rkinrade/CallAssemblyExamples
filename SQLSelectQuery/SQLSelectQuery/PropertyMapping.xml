@@ -1,6 +1,15 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8" ?>
 <PropertyMapping>
-  <ConnectionString>1</ConnectionString>
-  <SqlStatement>2</SqlStatement>
-  <ReturnValue>3</ReturnValue>
+  <PropertyMap>
+    <WorkflowID>SAMPLE</WorkflowID>
+    <ConnectionString>1</ConnectionString>
+    <SqlStatement>2</SqlStatement>
+    <ReturnValue>3</ReturnValue>
+  </PropertyMap>
+  <PropertyMap>
+    <WorkflowID>eF37bs64D</WorkflowID>
+    <ConnectionString>4</ConnectionString>
+    <SqlStatement>5</SqlStatement>
+    <ReturnValue>6</ReturnValue>
+  </PropertyMap>
 </PropertyMapping>
